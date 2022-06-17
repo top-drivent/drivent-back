@@ -5,13 +5,17 @@ import { Event } from '@prisma/client';
 import dayjs from 'dayjs';
 
 async function getFirstEvent(): Promise<GetFirstEventResult> {
-  const event = await eventRepository.findFirst();
+  let event = await eventRepository.findFirst();
+  if (!event) {
+    await eventRepository.createEvent();
+    event = await eventRepository.findFirst();
+  }
   if (!event) throw notFoundError();
 
-  return exclude(event, 'createdAt', 'updatedAt');
+  return event;
 }
 
-export type GetFirstEventResult = Omit<Event, 'createdAt' | 'updatedAt'>;
+export type GetFirstEventResult = Omit<Event, 'id' | 'createdAt' | 'updatedAt'>;
 
 async function isCurrentEventActive(): Promise<boolean> {
   const event = await eventRepository.findFirst();
