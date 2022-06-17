@@ -1,21 +1,34 @@
 import { notFoundError } from '@/errors';
 import eventRepository from '@/repositories/event-repository';
-import { exclude } from '@/utils/prisma-utils';
-import { Event } from '@prisma/client';
 import dayjs from 'dayjs';
+
+export type GetFirstEventResult = {
+  title: string;
+  backgroundImageUrl: string;
+  logoImageUrl: string;
+  startsAt: Date;
+  endsAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 async function getFirstEvent(): Promise<GetFirstEventResult> {
   let event = await eventRepository.findFirst();
   if (!event) {
-    await eventRepository.createEvent();
+    const newEvent = {
+      title: 'Driven.t',
+      logoImageUrl: 'https://files.driveneducation.com.br/images/logo-rounded.png',
+      backgroundImageUrl: 'linear-gradient(to right, #FA4098, #FFD77F)',
+      startsAt: dayjs().toDate(),
+      endsAt: dayjs().add(21, 'days').toDate(),
+    };
+    await eventRepository.createEvent(newEvent);
     event = await eventRepository.findFirst();
   }
   if (!event) throw notFoundError();
 
   return event;
 }
-
-export type GetFirstEventResult = Omit<Event, 'id' | 'createdAt' | 'updatedAt'>;
 
 async function isCurrentEventActive(): Promise<boolean> {
   const event = await eventRepository.findFirst();
