@@ -9,7 +9,6 @@ export const redis = createClient({
 
 init().then(() => {
   redis.connect();
-
   app.listen(port, () => {
     /* eslint-disable-next-line no-console */
     console.log(`Server is listening on port ${port}.`);
